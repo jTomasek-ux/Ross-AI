@@ -1,4 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { animate, motion } from "framer-motion";
+
+const NAV_OFFSET = 64;
+
+function scrollToSection(id: string) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  const top =
+    element.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+
+  animate(window.scrollY, top, {
+    duration: 1.1,
+    ease: [0.22, 1, 0.36, 1],
+    onUpdate: (latest) => window.scrollTo(0, latest),
+  });
+}
 
 export default function Hero() {
   return (
@@ -37,19 +56,28 @@ export default function Hero() {
             Analyze a Contract
             <span aria-hidden>→</span>
           </Link>
-          <a
-            href="#what-ross-does"
-            className="text-sm font-sans font-medium tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-200"
+          <motion.button
+            type="button"
+            onClick={() => scrollToSection("what-ross-does")}
+            whileHover={{ opacity: 0.85 }}
+            whileTap={{ scale: 0.98 }}
+            className="text-sm font-sans font-medium tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-200 cursor-pointer"
           >
             Learn more
-          </a>
+          </motion.button>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20">
+      <motion.button
+        type="button"
+        aria-label="Scroll to features"
+        onClick={() => scrollToSection("what-ross-does")}
+        whileHover={{ opacity: 0.6 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20 cursor-pointer"
+      >
         <div className="w-px h-12 bg-white/20 animate-pulse" />
-      </div>
+      </motion.button>
     </section>
   );
 }

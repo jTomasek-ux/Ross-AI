@@ -1,3 +1,7 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 const features = [
   {
     number: "01",
@@ -21,9 +25,13 @@ const features = [
 
 export default function FeatureSection() {
   return (
-    <section
+    <motion.section
       id="what-ross-does"
-      className="bg-ross-offwhite py-28 md:py-36 px-6"
+      initial={{ opacity: 0, y: 48 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="bg-ross-offwhite py-28 md:py-36 px-6 scroll-mt-16"
     >
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
@@ -39,9 +47,17 @@ export default function FeatureSection() {
 
         {/* Feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-ross-lightgrey">
-          {features.map((feature) => (
-            <div
+          {features.map((feature, index) => (
+            <motion.div
               key={feature.number}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.6,
+                delay: index * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="bg-ross-offwhite p-10 flex flex-col gap-6 group hover:bg-white transition-colors duration-300"
             >
               <span className="font-sans text-xs font-medium tracking-[0.3em] uppercase text-ross-midgrey">
@@ -53,10 +69,10 @@ export default function FeatureSection() {
               <p className="font-sans font-light text-ross-midgrey text-sm leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
