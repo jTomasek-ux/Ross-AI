@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking)
   {
@@ -27,18 +29,13 @@ const securityHeaders = [
     value: "max-age=63072000; includeSubDomains; preload",
   },
   // Content Security Policy
-  // - default-src 'self': only load resources from our own origin by default
-  // - script-src 'self' 'unsafe-inline': Next.js requires unsafe-inline for inline scripts
-  // - style-src 'self' 'unsafe-inline': Tailwind injects inline styles
-  // - font-src 'self' https://fonts.gstatic.com: allow Google Fonts
-  // - connect-src 'self': only allow fetch/XHR to our own origin
-  // - img-src 'self' data:: allow inline SVG data URIs
-  // - frame-ancestors 'none': belt-and-suspenders against framing (alongside X-Frame-Options)
+  // - script-src 'unsafe-eval' is required by React in development only (callstack debugging)
+  // - production omits unsafe-eval; React does not use eval() in production builds
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self'",
