@@ -14,13 +14,25 @@ AI-powered contract review. Upload a PDF contract and get a plain English summar
 
 ### 2. Add your key to the project
 
-Create a `.env.local` file in the root of the project:
+Copy the example env file and add your real API key:
+
+```bash
+# macOS / Linux
+cp .env.example .env.local
+
+# Windows (PowerShell)
+copy .env.example .env.local
+```
+
+Then open `.env.local` and replace the placeholder with your key:
 
 ```
-OPENAI_API_KEY=sk-...your-key-here...
+OPENAI_API_KEY=sk-proj-...your-real-key...
 ```
 
-This file is already in `.gitignore` — it will never be committed.
+`.env.local` must be a **file** in the project root (same folder as `package.json`), not a folder. It is in `.gitignore` and will never be committed.
+
+**Important:** restart the dev server after creating or editing `.env.local` (`Ctrl+C`, then `npm run dev`). Next.js only loads env files on startup — you should see `Environments: .env.local` in the terminal when it worked.
 
 ### 3. Run the dev server
 

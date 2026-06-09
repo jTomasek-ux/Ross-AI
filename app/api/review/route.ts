@@ -8,7 +8,18 @@ export const dynamic = "force-dynamic";
 const MAX_CHARS = 15000;
 
 export async function POST(request: NextRequest) {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      {
+        error:
+          "OpenAI API key is not configured. Add OPENAI_API_KEY to .env.local in the project root, then restart the dev server.",
+      },
+      { status: 503 }
+    );
+  }
+
+  const openai = new OpenAI({ apiKey });
 
   try {
     const formData = await request.formData();
