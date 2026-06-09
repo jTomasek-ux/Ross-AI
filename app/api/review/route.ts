@@ -5,6 +5,9 @@ import { buildLegalPrompt } from "@/lib/prompts";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
+// Extend the serverless function timeout to 60s (Vercel Hobby supports up to 60s).
+// PDF parsing + GPT-4o streaming can exceed the default 10s limit.
+export const maxDuration = 60;
 
 const MAX_CHARS = 15000;
 const PDF_MAGIC = "%PDF-";
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "OpenAI API key is not configured. Add OPENAI_API_KEY to .env.local in the project root, then restart the dev server.",
+          "OpenAI API key is not configured. Locally: add OPENAI_API_KEY to .env.local. On Vercel: add it under Project → Settings → Environment Variables.",
       },
       { status: 503, headers: rateLimitHeaders(rl) }
     );

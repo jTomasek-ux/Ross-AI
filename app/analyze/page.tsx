@@ -34,10 +34,29 @@ export default function AnalyzePage() {
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(
-          data.error || "Analysis failed. Please try again."
-        );
+        // Try to parse JSON error body; fall back to status-specific messages
+        // if the server returned HTML (e.g. a Vercel 504 timeout page).
+        const isJson = response.headers
+          .get("content-type")
+          ?.includes("application/json");
+        const data = isJson ? await response.json().catch(() => ({})) : {};
+
+        let message = data.error;
+        if (!message) {
+          if (response.status === 504 || response.status === 524) {
+            message =
+              "The analysis timed out. Your contract may be too large — try a shorter document.";
+          } else if (response.status === 503) {
+            message =
+              "Service unavailable. The OpenAI API key may not be configured on the server.";
+          } else if (response.status === 429) {
+            message =
+              "Too many requests. Please wait a few minutes before trying again.";
+          } else {
+            message = `Analysis failed (${response.status}). Please try again.`;
+          }
+        }
+        throw new Error(message);
       }
 
       const reader = response.body!.getReader();
