@@ -49,10 +49,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 1. You land on the homepage — a Harvey-inspired dark hero page.
 2. Click **Analyze a Contract** to go to the analysis tool.
-3. Drop or upload a PDF contract (text-based, up to 10MB).
+3. Drop or upload a PDF contract (text-based, up to 4MB).
 4. Click **Analyze Contract** — the app sends your PDF to a Next.js API route.
-5. The server extracts the text with `pdf-parse`, then sends it to GPT-4o.
+5. The server extracts the text with **unpdf**, then sends it to GPT-4o.
 6. GPT-4o streams the response back, and you see the Summary and Key Obligations appear word-by-word in real time.
+
+For a full walkthrough (upload → extract → prompt → stream → UI), see **[How it works](/docs/how-it-works)** in the docs or `content/docs/how-it-works.mdx` in the repo.
 
 ---
 
@@ -61,7 +63,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | Concept | Where |
 |---|---|
 | Prompt engineering | `lib/prompts.ts` |
-| PDF text extraction | `app/api/review/route.ts` |
+| PDF text extraction | `lib/extractPdfText.ts` |
+| End-to-end AI workflow | `content/docs/how-it-works.mdx` |
 | OpenAI streaming API | `app/api/review/route.ts` |
 | Server-side API calls (key stays safe) | `app/api/review/route.ts` |
 | Streaming response parsing on the client | `app/analyze/page.tsx` |
