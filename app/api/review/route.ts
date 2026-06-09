@@ -2,12 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { PDFParse } from "pdf-parse";
 import { buildLegalPrompt } from "@/lib/prompts";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
 const MAX_CHARS = 15000;
+const PDF_MAGIC = "%PDF-";
+
+function rateLimitHeaders(result: ReturnType<typeof checkRateLimit>) {
+  return {
+    "X-RateLimit-Limit": String(result.limit),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(result.resetIn),
+  };
+}
 
 export async function POST(request: NextRequest) {
+  // --- Rate limiting ---
+  const ip = getClientIp(request);
+  const rl = checkRateLimit(ip);
+
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        error: `Too many requests. Please wait ${rl.resetIn} seconds before trying again.`,
+      },
+      {
+        status: 429,
+        headers: {
+          ...rateLimitHeaders(rl),
+          "Retry-After": String(rl.resetIn),
+        },
+      }
+    );
+  }
+
+  // --- API key guard ---
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json(
@@ -15,7 +45,7 @@ export async function POST(request: NextRequest) {
         error:
           "OpenAI API key is not configured. Add OPENAI_API_KEY to .env.local in the project root, then restart the dev server.",
       },
-      { status: 503 }
+      { status: 503, headers: rateLimitHeaders(rl) }
     );
   }
 
@@ -28,29 +58,37 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { error: "No file provided. Please upload a PDF contract." },
-        { status: 400 }
+        { status: 400, headers: rateLimitHeaders(rl) }
       );
     }
 
+    // MIME type check (client-provided, used as first filter only)
     if (file.type !== "application/pdf") {
       return NextResponse.json(
-        {
-          error:
-            "Only PDF files are supported. Please upload a .pdf contract.",
-        },
-        { status: 400 }
+        { error: "Only PDF files are supported. Please upload a .pdf contract." },
+        { status: 400, headers: rateLimitHeaders(rl) }
       );
     }
 
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { error: "File too large. Please upload a PDF under 10MB." },
-        { status: 400 }
+        { status: 400, headers: rateLimitHeaders(rl) }
       );
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // Magic bytes check — verifies the file is actually a PDF regardless of
+    // what the client claims in Content-Type
+    const magic = buffer.slice(0, 5).toString("ascii");
+    if (magic !== PDF_MAGIC) {
+      return NextResponse.json(
+        { error: "File is not a valid PDF. Please upload a genuine PDF contract." },
+        { status: 400, headers: rateLimitHeaders(rl) }
+      );
+    }
 
     let contractText: string;
     try {
@@ -64,7 +102,7 @@ export async function POST(request: NextRequest) {
           error:
             "Could not read the PDF. Please ensure it contains selectable text (not a scanned image).",
         },
-        { status: 422 }
+        { status: 422, headers: rateLimitHeaders(rl) }
       );
     }
 
@@ -74,7 +112,7 @@ export async function POST(request: NextRequest) {
           error:
             "The PDF appears to contain no readable text. Please upload a text-based PDF.",
         },
-        { status: 422 }
+        { status: 422, headers: rateLimitHeaders(rl) }
       );
     }
 
@@ -117,6 +155,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
         "X-Content-Type-Options": "nosniff",
+        ...rateLimitHeaders(rl),
       },
     });
   } catch (error) {
@@ -129,27 +168,26 @@ export async function POST(request: NextRequest) {
             error:
               "Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local.",
           },
-          { status: 502 }
+          { status: 502, headers: rateLimitHeaders(rl) }
         );
       }
       if (error.status === 429) {
         return NextResponse.json(
           {
-            error:
-              "OpenAI rate limit reached. Please wait a moment and try again.",
+            error: "OpenAI rate limit reached. Please wait a moment and try again.",
           },
-          { status: 429 }
+          { status: 429, headers: rateLimitHeaders(rl) }
         );
       }
       return NextResponse.json(
         { error: "AI service error. Please try again." },
-        { status: 502 }
+        { status: 502, headers: rateLimitHeaders(rl) }
       );
     }
 
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      { status: 500, headers: rateLimitHeaders(rl) }
     );
   }
 }
