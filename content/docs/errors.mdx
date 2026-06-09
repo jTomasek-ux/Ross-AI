@@ -1,0 +1,94 @@
+---
+title: Errors
+description: HTTP error codes returned by Ross AI with causes and recovery steps.
+---
+
+# Error reference
+
+Every error from `POST /api/review` returns JSON with an `error` string:
+
+```json
+{ "error": "Description of what went wrong" }
+```
+
+## missing_file HTTP 400
+
+No file was included in the multipart form.
+
+**What to do:** Attach a PDF as the `file` field.
+
+## invalid_type HTTP 400
+
+The uploaded file is not `application/pdf`.
+
+**What to do:** Upload a `.pdf` file only.
+
+## file_too_large HTTP 400
+
+The PDF exceeds the 4 MB limit (Vercel serverless body limit).
+
+**What to do:** Use a smaller PDF or split the contract before upload.
+
+## invalid_pdf HTTP 400
+
+The file does not start with PDF magic bytes (`%PDF-`).
+
+**What to do:** Upload a genuine PDF, not a renamed file.
+
+## unreadable_pdf HTTP 422
+
+PDF parsing failed — often a corrupted file or unsupported format.
+
+**What to do:** Re-export the contract as a standard PDF.
+
+## no_text HTTP 422
+
+The PDF contains fewer than 100 characters of extractable text. Common with scanned image PDFs.
+
+**What to do:** Use a text-based PDF with selectable text, not a scan.
+
+## rate_limited HTTP 429
+
+You exceeded 10 requests per 15 minutes from your IP.
+
+**What to do:** Wait for the window to reset. Check `Retry-After` and `X-RateLimit-Reset` headers.
+
+## key_missing HTTP 503
+
+`OPENAI_API_KEY` is not set on the server.
+
+**What to do:** Locally, add the key to `.env.local` and restart. On Vercel, add the variable for **Production** and redeploy.
+
+## invalid_key HTTP 502
+
+OpenAI rejected the API key (401 from upstream).
+
+**What to do:** Verify the key at [platform.openai.com](https://platform.openai.com/api-keys).
+
+## openai_rate_limited HTTP 429
+
+OpenAI rate limit reached (distinct from Ross AI rate limit).
+
+**What to do:** Wait a moment and retry. Check your OpenAI usage dashboard.
+
+## ai_error HTTP 502
+
+OpenAI returned an unexpected error.
+
+**What to do:** Retry once. If it persists, check OpenAI status.
+
+## internal_error HTTP 500
+
+An unhandled server error occurred.
+
+**What to do:** Retry with a smaller PDF. Check Vercel function logs for details.
+
+## timeout HTTP 504 / 524
+
+The analysis exceeded the serverless function timeout (60 s).
+
+**What to do:** Use a shorter contract. Very large PDFs take longer to parse and analyze.
+
+---
+
+> Streaming success responses use `text/plain`, not JSON. Only error responses are JSON.

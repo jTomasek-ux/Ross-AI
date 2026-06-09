@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 
 @theme {
   --color-ross-black: #0a0a0a;
@@ -55,4 +57,32 @@ body {
 
 .legal-prose a:hover {
   opacity: 0.7;
+}
+
+/* Ross brand overrides for Fumadocs */
+:root {
+  --fd-primary: #0a0a0a;
+  --fd-ring: #0a0a0a;
+  --fd-background: #f5f4f0;
+}
+
+.dark {
+  --fd-primary: #f5f4f0;
+  --fd-ring: #f5f4f0;
+  --fd-background: #0a0a0a;
+}
+
+/* Docs: plain blockquotes — no icon or colored accent bar */
+.prose blockquote {
+  border-left: 2px solid #e8e7e3;
+  background: #f5f4f0;
+  color: rgba(10, 10, 10, 0.75);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-style: normal;
+}
+
+.prose blockquote::before,
+.prose blockquote::after {
+  content: none;
 }

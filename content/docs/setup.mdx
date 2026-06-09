@@ -1,0 +1,68 @@
+---
+title: Setup
+description: Run Ross AI locally with an OpenAI API key.
+---
+
+# Setup
+
+## Prerequisites
+
+- Node.js 20+
+- An [OpenAI API key](https://platform.openai.com/api-keys) with billing enabled
+
+## Install
+
+```bash
+git clone https://github.com/jTomasek-ux/Ross-AI.git
+cd Ross-AI
+npm install
+```
+
+## Environment variables
+
+Copy the example file and add your key:
+
+```bash
+# macOS / Linux
+cp .env.example .env.local
+
+# Windows (PowerShell)
+copy .env.example .env.local
+```
+
+Edit `.env.local`:
+
+```bash
+OPENAI_API_KEY=sk-proj-...your-real-key...
+```
+
+Optional public URLs (for docs and app links):
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_DOCS_URL=http://localhost:3000/docs
+```
+
+`.env.local` is gitignored and never committed.
+
+## Run the dev server
+
+```bash
+npm run dev
+```
+
+You should see `Environments: .env.local` in the terminal. Open:
+
+- App: [http://localhost:3000](http://localhost:3000)
+- Docs: [http://localhost:3000/docs](http://localhost:3000/docs)
+
+> Restart the dev server after changing `.env.local`. Next.js only loads env files on startup.
+
+## Test an analysis
+
+1. Go to `/analyze`
+2. Upload a **text-based** PDF (not a scanned image)
+3. Keep the file under **4MB**
+4. Click **Analyze Contract**
+
+If the key is missing, the API returns **503** with a clear error message.

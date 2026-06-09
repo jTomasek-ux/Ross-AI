@@ -1,0 +1,110 @@
+---
+title: POST /api/review
+description: Analyze a PDF contract and stream a GPT-4o summary and obligations list.
+---
+
+# POST /api/review
+
+Analyze an uploaded PDF contract. Returns a **streaming** plain-text response with `[SUMMARY]` and `[OBLIGATIONS]` sections.
+
+## Request
+
+```
+POST /api/review
+Content-Type: multipart/form-data
+```
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `file` | File | Yes | PDF contract, max 4 MB, text-based (not scanned) |
+
+### Example (cURL)
+
+```bash
+curl -X POST https://ross-ai-nine.vercel.app/api/review \
+  -F "file=@contract.pdf" \
+  --no-buffer
+```
+
+### Example (JavaScript)
+
+```javascript
+const formData = new FormData();
+formData.append("file", pdfFile);
+
+const response = await fetch("/api/review", {
+  method: "POST",
+  body: formData,
+});
+
+if (!response.ok) {
+  const { error } = await response.json();
+  throw new Error(error);
+}
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let text = "";
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  text += decoder.decode(value, { stream: true });
+}
+```
+
+## Response (success)
+
+```
+Content-Type: text/plain; charset=utf-8
+```
+
+Streamed body format:
+
+```
+[SUMMARY]
+This agreement is a software license between...
+
+[OBLIGATIONS]
+- Licensee: Pay annual fee of $12,000 by January 1
+- Licensor: Provide source code escrow within 30 days
+```
+
+### Response headers
+
+| Header | Description |
+| --- | --- |
+| `X-RateLimit-Limit` | Max requests per window (10) |
+| `X-RateLimit-Remaining` | Requests left in current window |
+| `X-RateLimit-Reset` | Seconds until window resets |
+| `Retry-After` | Present on 429 — seconds to wait |
+
+## Response (error)
+
+Errors return JSON:
+
+```json
+{ "error": "Human-readable message" }
+```
+
+See the [Error reference](/docs/errors) for all status codes.
+
+## Validation rules
+
+1. File must be present
+2. `Content-Type` must be `application/pdf`
+3. Size must be ≤ 4 MB
+4. File must start with `%PDF-` magic bytes
+5. Extracted text must be ≥ 100 characters (rejects image-only PDFs)
+6. Text is truncated to ~15,000 characters before sending to OpenAI
+
+## Server configuration
+
+| Setting | Value |
+| --- | --- |
+| `maxDuration` | 60 seconds |
+| Model | `gpt-4o` |
+| `max_tokens` | 1500 |
+| `temperature` | 0.2 |
+
+Requires `OPENAI_API_KEY` in server environment.

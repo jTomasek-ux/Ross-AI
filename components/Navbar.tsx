@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDocsHref } from "@/lib/urls";
 
 type NavbarProps = {
   variant?: "transparent" | "dark";
@@ -22,12 +23,20 @@ export default function Navbar({ variant = "dark" }: NavbarProps) {
         Ross <span className="font-medium">AI</span>
       </Link>
 
-      <Link
-        href="/analyze"
-        className="text-xs font-sans font-medium tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-200"
-      >
-        Analyze a Contract →
-      </Link>
+      <div className="flex items-center gap-6">
+        <Link
+          href={getDocsHref()}
+          className="text-xs font-sans font-medium tracking-widest uppercase text-white/50 hover:text-white transition-colors duration-200"
+        >
+          Docs
+        </Link>
+        <Link
+          href="/analyze"
+          className="text-xs font-sans font-medium tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-200"
+        >
+          Analyze a Contract →
+        </Link>
+      </div>
     </nav>
   );
 }

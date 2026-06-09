@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDocsHref } from "@/lib/urls";
 
 const legalLinks = [
   { href: "/terms", label: "Terms of Use" },
@@ -19,9 +20,15 @@ export default function Footer() {
           </Link>
 
           <nav
-            aria-label="Legal"
+            aria-label="Footer"
             className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
           >
+            <Link
+              href={getDocsHref()}
+              className="font-sans text-xs font-light text-white/50 hover:text-white/80 transition-colors"
+            >
+              Documentation
+            </Link>
             {legalLinks.map(({ href, label }) => (
               <Link
                 key={href}
