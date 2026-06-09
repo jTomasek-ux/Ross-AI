@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ross AI
 
-## Getting Started
+AI-powered contract review. Upload a PDF contract and get a plain English summary and key obligations in seconds — powered by GPT-4o.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Setup
+
+### 1. Get an OpenAI API key
+
+1. Create an account at [platform.openai.com](https://platform.openai.com)
+2. Add at least **$5 in credits** (you'll spend pennies per analysis)
+3. Go to **API keys** and create a new key
+
+### 2. Add your key to the project
+
+Create a `.env.local` file in the root of the project:
+
+```
+OPENAI_API_KEY=sk-...your-key-here...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This file is already in `.gitignore` — it will never be committed.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run the dev server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How it works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. You land on the homepage — a Harvey-inspired dark hero page.
+2. Click **Analyze a Contract** to go to the analysis tool.
+3. Drop or upload a PDF contract (text-based, up to 10MB).
+4. Click **Analyze Contract** — the app sends your PDF to a Next.js API route.
+5. The server extracts the text with `pdf-parse`, then sends it to GPT-4o.
+6. GPT-4o streams the response back, and you see the Summary and Key Obligations appear word-by-word in real time.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## What this teaches you
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Concept | Where |
+|---|---|
+| Prompt engineering | `lib/prompts.ts` |
+| PDF text extraction | `app/api/review/route.ts` |
+| OpenAI streaming API | `app/api/review/route.ts` |
+| Server-side API calls (key stays safe) | `app/api/review/route.ts` |
+| Streaming response parsing on the client | `app/analyze/page.tsx` |
+| Tailwind v4 theming | `app/globals.css` |
+
+---
+
+## Project structure
+
+```
+ross-ai/
+├── app/
+│   ├── page.tsx                  # Landing page
+│   ├── analyze/
+│   │   └── page.tsx              # Upload + analysis screen
+│   └── api/
+│       └── review/
+│           └── route.ts          # OpenAI streaming API route
+├── components/
+│   ├── Navbar.tsx
+│   ├── Hero.tsx
+│   ├── FeatureSection.tsx
+│   ├── PitchSection.tsx
+│   ├── UploadZone.tsx
+│   ├── ResultsPanel.tsx
+│   ├── ErrorModal.tsx
+│   └── Footer.tsx
+├── lib/
+│   └── prompts.ts                # GPT-4o legal analysis prompt
+└── .env.local                    # Your OpenAI API key (not committed)
+```
+
+---
+
+## Notes
+
+- Contracts are truncated to ~15,000 characters to keep API costs low.
+- Only text-based PDFs are supported. Scanned documents (image PDFs) will not work.
+- This is a proof-of-concept. **Not legal advice.**
