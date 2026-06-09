@@ -1,6 +1,6 @@
 ---
 title: Deployment
-description: Deploy Ross AI to Vercel with environment variables and the docs subdomain.
+description: Deploy Ross AI to Vercel with environment variables and path-based documentation.
 ---
 
 # Deployment
@@ -21,30 +21,27 @@ In **Vercel → Project → Settings → Environment Variables**, add:
 | --- | --- | --- |
 | `OPENAI_API_KEY` | Production, Preview | Your OpenAI secret key |
 | `NEXT_PUBLIC_APP_URL` | Production | e.g. `https://ross-ai-nine.vercel.app` |
-| `NEXT_PUBLIC_DOCS_URL` | Production | e.g. `https://docs.ross-ai-nine.vercel.app` |
+| `NEXT_PUBLIC_DOCS_URL` | Optional | Only if using a custom docs subdomain (see below) |
 
 > If `OPENAI_API_KEY` is only set for **Preview**, production will return **503**. Enable it for **Production** and redeploy.
 
-## Docs subdomain
+## Documentation URL
 
-To serve documentation at `docs.ross-ai-nine.vercel.app`:
+Production docs are served at:
 
-1. Open **Vercel → Project → Settings → Domains**
-2. Add domain: `docs.ross-ai-nine.vercel.app`
-3. Assign it to the **same project** as the main app
-4. Redeploy after the domain is verified
+**https://ross-ai-nine.vercel.app/docs**
 
-Middleware rewrites `docs.*` requests to `/docs/*` routes. The path `/docs` also works on the primary domain.
+No extra Vercel domain setup is required. Navbar and footer "Docs" links point to `/docs` on the same host.
 
-### Local subdomain testing (optional)
+### Why not `docs.ross-ai-nine.vercel.app`?
 
-Add to your hosts file:
+Vercel does **not** support subdomains of the default `*.vercel.app` hostname (no DNS or SSL for `docs.project-name.vercel.app`). Attempting to open that URL will fail with a connection error.
 
-```
-127.0.0.1 docs.localhost
-```
+If you need a separate docs hostname later:
 
-Then run `npm run dev` and open `http://docs.localhost:3000`.
+1. Buy or use a custom domain (e.g. `ross-ai.com`)
+2. Add `docs.ross-ai.com` in **Vercel → Domains** with a CNAME to Vercel
+3. Set `NEXT_PUBLIC_DOCS_URL=https://docs.ross-ai.com` and re-enable subdomain middleware in the repo
 
 ## Production limits
 
@@ -63,5 +60,5 @@ Production uses **unpdf** (pure JavaScript) instead of `pdf-parse`, which relies
 
 - [ ] `OPENAI_API_KEY` enabled for Production
 - [ ] Latest commit deployed (includes unpdf fix)
-- [ ] `docs.ross-ai-nine.vercel.app` domain added (optional)
+- [ ] Docs reachable at `/docs` on your production URL
 - [ ] Test with a PDF under 4MB

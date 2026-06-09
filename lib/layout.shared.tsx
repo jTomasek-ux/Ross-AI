@@ -7,7 +7,7 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <span className="font-serif font-light tracking-widest uppercase">
           Ross <span className="font-medium">AI</span>
-          <span className="text-fd-muted-foreground font-sans text-xs tracking-[0.2em] ml-2">
+          <span className="text-ross-midgrey font-sans text-xs tracking-[0.2em] ml-2">
             Docs
           </span>
         </span>

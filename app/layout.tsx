@@ -38,7 +38,9 @@ export default function RootLayout({
       className={`${cormorant.variable} ${inter.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: "system", enableSystem: true }}>
+          {children}
+        </RootProvider>
       </body>
     </html>
   );

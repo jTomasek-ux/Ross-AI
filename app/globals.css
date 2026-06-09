@@ -22,9 +22,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark body {
+  background-color: #0a0a0a;
+  color: #f5f4f0;
+}
+
 ::selection {
   background-color: #0a0a0a;
   color: #f5f4f0;
+}
+
+.dark ::selection {
+  background-color: #f5f4f0;
+  color: #0a0a0a;
 }
 
 .legal-prose h2 {
@@ -59,17 +69,90 @@ body {
   opacity: 0.7;
 }
 
-/* Ross brand overrides for Fumadocs */
+/* Ross brand overrides for Fumadocs — light */
 :root {
+  --color-fd-primary: #0a0a0a;
+  --color-fd-foreground: #0a0a0a;
+  --color-fd-muted-foreground: #0a0a0a;
+  --color-fd-background: #f5f4f0;
+  --color-fd-card: #ffffff;
+  --color-fd-muted: #ebeae6;
+  --color-fd-secondary: #e8e7e3;
+  --color-fd-secondary-foreground: #0a0a0a;
+  --color-fd-accent: rgba(10, 10, 10, 0.06);
+  --color-fd-accent-foreground: #0a0a0a;
+  --color-fd-border: rgba(10, 10, 10, 0.12);
+  --color-fd-ring: #0a0a0a;
   --fd-primary: #0a0a0a;
   --fd-ring: #0a0a0a;
   --fd-background: #f5f4f0;
 }
 
+/* Ross brand overrides for Fumadocs — dark */
 .dark {
+  color-scheme: dark;
+  --color-fd-primary: #f5f4f0;
+  --color-fd-foreground: #f5f4f0;
+  --color-fd-muted-foreground: #f5f4f0;
+  --color-fd-background: #0a0a0a;
+  --color-fd-card: #141414;
+  --color-fd-muted: #161616;
+  --color-fd-secondary: #1a1a1a;
+  --color-fd-secondary-foreground: #f5f4f0;
+  --color-fd-accent: rgba(255, 255, 255, 0.08);
+  --color-fd-accent-foreground: #f5f4f0;
+  --color-fd-border: rgba(255, 255, 255, 0.1);
+  --color-fd-ring: #f5f4f0;
   --fd-primary: #f5f4f0;
   --fd-ring: #f5f4f0;
   --fd-background: #0a0a0a;
+}
+
+/* Docs prose — light */
+.ross-docs .prose {
+  --tw-prose-body: #0a0a0a;
+  --tw-prose-headings: #0a0a0a;
+  --tw-prose-lead: #0a0a0a;
+  --tw-prose-links: #0a0a0a;
+  --tw-prose-bold: #0a0a0a;
+  --tw-prose-counters: #0a0a0a;
+  --tw-prose-bullets: #4a4a4a;
+  --tw-prose-quotes: #0a0a0a;
+  --tw-prose-captions: #0a0a0a;
+  --tw-prose-code: #0a0a0a;
+  --tw-prose-kbd: #0a0a0a;
+}
+
+.ross-docs .text-fd-muted-foreground {
+  color: #0a0a0a;
+}
+
+/* Docs prose — dark */
+.dark .ross-docs .prose {
+  --tw-prose-body: #f5f4f0;
+  --tw-prose-headings: #f5f4f0;
+  --tw-prose-lead: #f5f4f0;
+  --tw-prose-links: #f5f4f0;
+  --tw-prose-bold: #f5f4f0;
+  --tw-prose-counters: #f5f4f0;
+  --tw-prose-bullets: #8a8a8a;
+  --tw-prose-quotes: #f5f4f0;
+  --tw-prose-captions: #f5f4f0;
+  --tw-prose-code: #f5f4f0;
+  --tw-prose-kbd: #f5f4f0;
+}
+
+.dark .ross-docs .text-fd-muted-foreground {
+  color: #f5f4f0;
+}
+
+/* Docs sidebar tab label (Ross AI) — match section group style */
+.ross-docs aside button.rounded-lg.border p.text-sm.font-medium {
+  color: #8a8a8a;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 /* Docs: plain blockquotes — no icon or colored accent bar */
@@ -80,6 +163,12 @@ body {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   font-style: normal;
+}
+
+.dark .prose blockquote {
+  border-left-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(245, 244, 240, 0.9);
 }
 
 .prose blockquote::before,
