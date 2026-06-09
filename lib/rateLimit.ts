@@ -1,5 +1,5 @@
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_REQUESTS = 5;
+const MAX_REQUESTS = 10;
 
 interface WindowEntry {
   count: number;
@@ -67,11 +67,15 @@ export function checkRateLimit(ip: string): RateLimitResult {
 }
 
 export function getClientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
     // x-forwarded-for can be a comma-separated list; the first is the real client
     return forwarded.split(",")[0].trim();
   }
+
   // Fallback — unknown IP gets a shared bucket (conservative)
   return "unknown";
 }

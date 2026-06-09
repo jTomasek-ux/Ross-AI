@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { PDFParse } from "pdf-parse";
 import { buildLegalPrompt } from "@/lib/prompts";
+import { extractPdfText } from "@/lib/extractPdfText";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const MAX_CHARS = 15000;
+// Vercel serverless request body limit is 4.5 MB on Hobby/Pro.
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
 const PDF_MAGIC = "%PDF-";
 
 function rateLimitHeaders(result: ReturnType<typeof checkRateLimit>) {
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "OpenAI API key is not configured. Locally: add OPENAI_API_KEY to .env.local. On Vercel: add it under Project → Settings → Environment Variables.",
+          "OpenAI API key is not configured. Locally: add OPENAI_API_KEY to .env.local. On Vercel: add OPENAI_API_KEY under Project → Settings → Environment Variables and enable it for Production, then redeploy.",
       },
       { status: 503, headers: rateLimitHeaders(rl) }
     );
@@ -73,9 +75,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_FILE_BYTES) {
       return NextResponse.json(
-        { error: "File too large. Please upload a PDF under 10MB." },
+        {
+          error:
+            "File too large. Please upload a PDF under 4MB (Vercel serverless limit).",
+        },
         { status: 400, headers: rateLimitHeaders(rl) }
       );
     }
@@ -95,11 +100,9 @@ export async function POST(request: NextRequest) {
 
     let contractText: string;
     try {
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
-      await parser.destroy();
-      contractText = result.text?.trim() ?? "";
-    } catch {
+      contractText = await extractPdfText(buffer);
+    } catch (pdfError) {
+      console.error("[/api/review] PDF extraction failed:", pdfError);
       return NextResponse.json(
         {
           error:

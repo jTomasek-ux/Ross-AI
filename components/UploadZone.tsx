@@ -57,7 +57,7 @@ export default function UploadZone({
           Upload Contract
         </h2>
         <p className="font-sans font-light text-ross-midgrey text-sm">
-          PDF files only. Text-based contracts up to 10MB.
+          PDF files only. Text-based contracts up to 4MB.
         </p>
       </div>
 
